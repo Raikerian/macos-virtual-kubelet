@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	"net"
 
@@ -15,11 +14,13 @@ import (
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/mem"
 	psnet "github.com/shirou/gopsutil/v3/net"
+	"github.com/virtual-kubelet/virtual-kubelet/log"
 	"github.com/virtual-kubelet/virtual-kubelet/node/api"
 	"github.com/virtual-kubelet/virtual-kubelet/node/api/statsv1alpha1"
 	"github.com/virtual-kubelet/virtual-kubelet/node/nodeutil"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // MacOSProvider implements the virtual-kubelet provider interface.
@@ -53,86 +54,86 @@ func NewMacOSProvider(rm *manager.ResourceManager, nodeName, operatingSystem, in
 
 // CreatePod takes a Kubernetes Pod and deploys it within the MacOS provider.
 func (p *MacOSProvider) CreatePod(ctx context.Context, pod *corev1.Pod) error {
-	log.Printf("Received CreatePod request for %s/%s.\n", pod.Namespace, pod.Name)
-	return errNotImplemented
+	log.G(ctx).Infof("Received CreatePod request for %s/%s.\n", pod.Namespace, pod.Name)
+	return p.rm.AddPod(ctx, pod)
 }
 
 // UpdatePod takes a Kubernetes Pod and updates it within the provider.
 func (p *MacOSProvider) UpdatePod(ctx context.Context, pod *corev1.Pod) error {
-	log.Printf("Received UpdatePod request for %s/%s.\n", pod.Namespace, pod.Name)
+	log.G(ctx).Infof("Received UpdatePod request for %s/%s.\n", pod.Namespace, pod.Name)
 
-	return nil
+	return errNotImplemented
 }
 
 // DeletePod takes a Kubernetes Pod and deletes it from the provider.
 func (p *MacOSProvider) DeletePod(ctx context.Context, pod *corev1.Pod) error {
-	log.Printf("Received DeletePod request for %s/%s.\n", pod.Namespace, pod.Name)
-	return errNotImplemented
+	log.G(ctx).Infof("Received DeletePod request for %s/%s.\n", pod.Namespace, pod.Name)
+	return p.rm.DeletePod(ctx, pod)
 }
 
 // GetPod retrieves a pod by name from the provider (can be cached).
 func (p *MacOSProvider) GetPod(ctx context.Context, namespace, name string) (*corev1.Pod, error) {
-	log.Printf("Received GetPod request for %s/%s.\n", namespace, name)
-
-	pods := p.rm.GetPods()
-	for _, pod := range pods {
-		if pod.Namespace == namespace && pod.Name == name {
-			return pod, nil
-		}
-	}
-	return nil, nil
+	log.G(ctx).Infof("Received GetPod request for %s/%s.\n", namespace, name)
+	return p.rm.GetPod(types.NamespacedName{Namespace: namespace, Name: name}), nil
 }
 
 // GetPodStatus retrieves the status of a pod by name from the provider.
 func (p *MacOSProvider) GetPodStatus(ctx context.Context, namespace, name string) (*corev1.PodStatus, error) {
-	pod, err := p.GetPod(ctx, namespace, name)
-	if err != nil {
-		return nil, err
-	}
+	log.G(ctx).Infof("Received GetPodStatus request for %s/%s.\n", namespace, name)
+	return nil, errNotImplemented
+	// pod, err := p.GetPod(ctx, namespace, name)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	if pod == nil {
-		return nil, nil
-	}
+	// if pod == nil {
+	// 	return nil, nil
+	// }
 
-	return &pod.Status, nil
+	// return &pod.Status, nil
 }
 
 // GetPods retrieves a list of all pods running on the provider (can be cached).
 func (p *MacOSProvider) GetPods(ctx context.Context) ([]*corev1.Pod, error) {
-	log.Println("Received GetPods request.")
+	log.G(ctx).Info("Received GetPods request.\n")
 	return p.rm.GetPods(), nil
 }
 
 // GetContainerLogs retrieves the logs of a container by name from the provider.
 func (p *MacOSProvider) GetContainerLogs(ctx context.Context, namespace, podName, containerName string, opts api.ContainerLogOpts) (io.ReadCloser, error) {
-	log.Printf("Received GetContainerLogs request for %s/%s/%s.\n", namespace, podName, containerName)
+	log.G(ctx).Infof("Received GetContainerLogs request for %s/%s/%s.\n", namespace, podName, containerName)
 	return nil, errNotImplemented
 }
 
 // RunInContainer executes a command in a container in the pod, copying data
 // between in/out/err and the container's stdin/stdout/stderr.
 func (p *MacOSProvider) RunInContainer(ctx context.Context, namespace, podName, containerName string, cmd []string, attach api.AttachIO) error {
+	log.G(ctx).Infof("Received RunInContainer request for %s/%s/%s.\n", namespace, podName, containerName)
 	return errNotImplemented
 }
 
 // AttachToContainer attaches to the executing process of a container in the pod, copying data
 // between in/out/err and the container's stdin/stdout/stderr.
 func (p *MacOSProvider) AttachToContainer(ctx context.Context, namespace, podName, containerName string, attach api.AttachIO) error {
+	log.G(ctx).Infof("Received AttachToContainer request for %s/%s/%s.\n", namespace, podName, containerName)
 	return errNotImplemented
 }
 
 // GetStatsSummary gets the stats for the node, including running pods
-func (p *MacOSProvider) GetStatsSummary(context.Context) (*statsv1alpha1.Summary, error) {
+func (p *MacOSProvider) GetStatsSummary(ctx context.Context) (*statsv1alpha1.Summary, error) {
+	log.G(ctx).Info("Received GetStatsSummary request.\n")
 	return nil, errNotImplemented
 }
 
 // GetMetricsResource gets the metrics for the node, including running pods
-func (p *MacOSProvider) GetMetricsResource(context.Context) ([]*dto.MetricFamily, error) {
+func (p *MacOSProvider) GetMetricsResource(ctx context.Context) ([]*dto.MetricFamily, error) {
+	log.G(ctx).Info("Received GetMetricsResource request.\n")
 	return nil, errNotImplemented
 }
 
 // PortForward forwards a local port to a port on the pod
 func (p *MacOSProvider) PortForward(ctx context.Context, namespace, pod string, port int32, stream io.ReadWriteCloser) error {
+	log.G(ctx).Infof("Received PortForward request for %s/%s:%d.\n", namespace, pod, port)
 	return errNotImplemented
 }
 
@@ -159,17 +160,17 @@ func (p *MacOSProvider) ConfigureNode(ctx context.Context, n *corev1.Node) {
 func (p *MacOSProvider) capacity(ctx context.Context) corev1.ResourceList {
 	v, err := mem.VirtualMemoryWithContext(ctx)
 	if err != nil {
-		log.Printf("Error getting memory capacity: %v", err)
+		log.G(ctx).WithError(err).Error("Error getting memory capacity")
 	}
 
 	c, err := cpu.CountsWithContext(ctx, true)
 	if err != nil {
-		log.Printf("Error getting cpu capacity: %v", err)
+		log.G(ctx).WithError(err).Error("Error getting cpu capacity")
 	}
 
 	d, err := disk.UsageWithContext(ctx, "/")
 	if err != nil {
-		log.Printf("Error getting disk capacity: %v", err)
+		log.G(ctx).WithError(err).Error("Error getting disk capacity")
 	}
 
 	rl := corev1.ResourceList{
@@ -184,7 +185,7 @@ func (p *MacOSProvider) capacity(ctx context.Context) corev1.ResourceList {
 func (p *MacOSProvider) nodeAddresses(ctx context.Context) []corev1.NodeAddress {
 	ifs, err := psnet.InterfacesWithContext(ctx)
 	if err != nil {
-		log.Printf("Error getting network interfaces: %v", err)
+		log.G(ctx).WithError(err).Error("Error getting network interfaces")
 	}
 
 	addr := ""
@@ -195,7 +196,7 @@ func (p *MacOSProvider) nodeAddresses(ctx context.Context) []corev1.NodeAddress 
 			for _, a := range i.Addrs {
 				ip, _, err := net.ParseCIDR(a.Addr)
 				if err != nil {
-					log.Printf("Error parsing CIDR: %v", err)
+					log.G(ctx).WithError(err).Error("Error parsing CIDR")
 				}
 				if ip.To4() != nil {
 					addr = ip.String()
@@ -220,7 +221,7 @@ func (p *MacOSProvider) nodeAddresses(ctx context.Context) []corev1.NodeAddress 
 func (p *MacOSProvider) nodeInfo(ctx context.Context) corev1.NodeSystemInfo {
 	info, err := host.InfoWithContext(ctx)
 	if err != nil {
-		log.Printf("Error getting host info: %v", err)
+		log.G(ctx).WithError(err).Error("Error getting host info")
 	}
 
 	return corev1.NodeSystemInfo{
