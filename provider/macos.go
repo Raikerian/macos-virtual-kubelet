@@ -55,7 +55,7 @@ func NewMacOSProvider(rm *manager.ResourceManager, nodeName, operatingSystem, in
 // CreatePod takes a Kubernetes Pod and deploys it within the MacOS provider.
 func (p *MacOSProvider) CreatePod(ctx context.Context, pod *corev1.Pod) error {
 	log.G(ctx).Infof("Received CreatePod request for %s/%s.\n", pod.Namespace, pod.Name)
-	return p.rm.AddPod(ctx, pod)
+	return p.rm.CreatePod(ctx, pod)
 }
 
 // UpdatePod takes a Kubernetes Pod and updates it within the provider.
@@ -80,17 +80,7 @@ func (p *MacOSProvider) GetPod(ctx context.Context, namespace, name string) (*co
 // GetPodStatus retrieves the status of a pod by name from the provider.
 func (p *MacOSProvider) GetPodStatus(ctx context.Context, namespace, name string) (*corev1.PodStatus, error) {
 	log.G(ctx).Infof("Received GetPodStatus request for %s/%s.\n", namespace, name)
-	return nil, errNotImplemented
-	// pod, err := p.GetPod(ctx, namespace, name)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// if pod == nil {
-	// 	return nil, nil
-	// }
-
-	// return &pod.Status, nil
+	return p.rm.GetPodStatus(types.NamespacedName{Namespace: namespace, Name: name}), nil
 }
 
 // GetPods retrieves a list of all pods running on the provider (can be cached).

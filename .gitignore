@@ -19,3 +19,9 @@
 
 # Go workspace file
 go.work
+
+# Build dir
+build
+
+# VSCode config (use make vscode to generate it for you local)
+.vscode/

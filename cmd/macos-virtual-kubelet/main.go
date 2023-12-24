@@ -9,9 +9,9 @@ import (
 	"syscall"
 
 	"github.com/pkg/errors"
-	"github.com/raikerian/macos-virtual-kubelet/cmd/virtual-kubelet/commands/providers"
-	"github.com/raikerian/macos-virtual-kubelet/cmd/virtual-kubelet/commands/root"
-	"github.com/raikerian/macos-virtual-kubelet/cmd/virtual-kubelet/commands/version"
+	"github.com/raikerian/macos-virtual-kubelet/cmd/macos-virtual-kubelet/commands/providers"
+	"github.com/raikerian/macos-virtual-kubelet/cmd/macos-virtual-kubelet/commands/root"
+	"github.com/raikerian/macos-virtual-kubelet/cmd/macos-virtual-kubelet/commands/version"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/virtual-kubelet/virtual-kubelet/log"
